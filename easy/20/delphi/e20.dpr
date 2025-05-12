@@ -3,71 +3,39 @@ program e20;
 {$APPTYPE CONSOLE}
 
 uses
-  SysUtils,
-  StrUtils,
-  Classes;
+  System.SysUtils, System.Classes, System.RegularExpressions;
 
 function CountWords(const s: string): Integer;
 var
-  WordList: TStringList;
-  i: Integer;
-  CleanString: string;
+  words: TArray<string>;
 begin
-  // ¹®ÀÚ¿­ ³» ´Ü¾î ¼ö¸¦ ¼¼´Â ÇÔ¼ö
-  // ´Ü¾î´Â °ø¹éÀ¸·Î ±¸ºĞµÊ
-
-  // ºó ¹®ÀÚ¿­ Ã³¸®
+  // ë¬¸ìì—´ì´ ë¹„ì–´ìˆëŠ” ê²½ìš° 0 ë°˜í™˜
   if Trim(s) = '' then
-  begin
-    Result := 0;
-    Exit;
-  end;
-
-  // °ø¹éÀ¸·Î ¹®ÀÚ¿­ ºĞÇÒ
-  WordList := TStringList.Create;
-  try
-    // ¹®ÀÚ¿­ ¾ÕµÚ °ø¹é Á¦°Å ¹× ¿¬¼ÓµÈ °ø¹é Ã³¸®
-    CleanString := Trim(s);
-    while Pos('  ', CleanString) > 0 do
-      CleanString := StringReplace(CleanString, '  ', ' ', [rfReplaceAll]);
-
-    // °ø¹éÀ¸·Î ¹®ÀÚ¿­ ºĞÇÒ
-    ExtractStrings([' '], [], PChar(CleanString), WordList);
-
-    // ºó Ç×¸ñ Á¦°Å
-    for i := WordList.Count - 1 downto 0 do
-      if Trim(WordList[i]) = '' then
-        WordList.Delete(i);
-
-    Result := WordList.Count;
-  finally
-    WordList.Free;
-  end;
+    Exit(0);
+  
+  // ë¬¸ìì—´ì„ ê³µë°±ìœ¼ë¡œ ë¶„ë¦¬í•˜ê³  ë¹ˆ ë¬¸ìì—´ ì œê±°
+  words := TRegEx.Split(Trim(s), '\s+');
+  
+  // ë‹¨ì–´ì˜ ê°œìˆ˜ ë°˜í™˜
+  Result := Length(words);
 end;
 
 var
   s: string;
+  wordCount: Integer;
 begin
   try
-    // ÀÔ·Â ¹Ş±â
-    Write('¹®ÀÚ¿­À» ÀÔ·ÂÇÏ¼¼¿ä: ');
+    // ì…ë ¥ ë° ì¶œë ¥
     ReadLn(s);
-
-    // ÀÔ·Â °ËÁõ
-    if Length(s) <= 200 then
-    begin
-      // ´Ü¾î ¼ö °è»ê ¹× Ãâ·Â
-      WriteLn('´Ü¾î ¼ö: ', CountWords(s));
-    end
-    else
-      WriteLn('¹®ÀÚ¿­ ±æÀÌ´Â 200ÀÚ ÀÌÇÏ¿©¾ß ÇÕ´Ï´Ù.');
+    wordCount := CountWords(s);
+    WriteLn(wordCount);
+    
+    ReadLn; // ì½˜ì†” ì°½ì´ ë‹«íˆì§€ ì•Šë„ë¡
   except
     on E: Exception do
-      WriteLn('¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: ', E.Message);
+    begin
+      WriteLn(E.ClassName, ': ', E.Message);
+      ReadLn;
+    end;
   end;
-
-  // ÇÁ·Î±×·¥À» Á¾·áÇÏ±â Àü¿¡ »ç¿ëÀÚ°¡ °á°ú¸¦ º¼ ¼ö ÀÖµµ·Ï ´ë±â
-  WriteLn;
-  Write('ÇÁ·Î±×·¥À» Á¾·áÇÏ·Á¸é ¾Æ¹« Å°³ª ´©¸£¼¼¿ä...');
-  ReadLn;
 end.
